@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simon Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css"
+          href="http://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Freckle+Face' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+<div class="main">
+    <h1 class="header">MIFind Simon Game</h1>
+    <div class="control">
+        <div class="col">
+            <div class="row">
+                <div class="color col-green" :style="isDisableTouch" @click="clickColor(0)">
+                    <audio autoplay v-if="isGreenClick">
+                        <source src="https://s3.amazonaws.com/freecodecamp/simonSound1.mp3" type="audio/ogg"/>
+                    </audio>
+                </div>
+                <div class="color col-red" :style="isDisableTouch" @click="clickColor(1)">
+                    <audio autoplay v-if="isRedClick">
+                        <source src="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3" type="audio/ogg"/>
+                    </audio>
+                </div>
+            </div>
+            <div class="row">
+                <div class="color col-yellow" :style="isDisableTouch" @click="clickColor(2)">
+                    <audio autoplay v-if="isYellowClick">
+                        <source src="https://s3.amazonaws.com/freecodecamp/simonSound3.mp3" type="audio/ogg"/>
+                    </audio>
+                </div>
+                <div class="color col-blue" :style="isDisableTouch" @click="clickColor(3)">
+                    <audio autoplay v-if="isBlueClick">
+                        <source src="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3" type="audio/ogg"/>
+                    </audio>
+                </div>
+            </div>
+        </div>
+        <div class="cl-control-tab">
+            <h1 style="margin-top: 30px">Simon<span>®</span></h1>
+            <div class="cl-steps">
+                <div class="cl-step-container">
+                    <div class="cl-step">
+                        <p style="color: red;">{{step}}</p>
+                    </div>
+                    <p>Count</p>
+                </div>
+                <div class="cl-step-container" style="margin-left: 10px">
+                    <div class="cl-Start" :style="!isPause?'background-color: #F85959;':'background-color: #cccccc;'">
+                    </div>
+                    <p class="btn" :style="isDisableTouch" @click="startAndPause">Start</p>
+                </div>
+                <div class="cl-step-container">
+                    <div class="cl-Strict-dot"
+                         :style="strictMode?'background-color: #FCCF4D;':'background-color: #cccccc;'"></div>
+                    <div class="cl-Strict"
+                         :style="strictMode?'background-color: #FCCF4D;':'background-color: #cccccc;'">
+                    </div>
+                    <p class="btn" :style="isDisableTouch" @click="strictMode=!strictMode">Strict</p>
+                </div>
+            </div>
+            <h4 style="margin-left: 7px" @click="startGame">
+                <i v-if="!isStart" class="fa fa-play"></i>
+                <i v-if="isStart" class="fa fa-pause"></i>
+            </h4>
+        </div>
+        <audio autoplay v-if="isMistake">
+            <source src="http://adamcot.com/static/audio/simon_mistake.mp3" type="audio/ogg"/>
+        </audio>
+        <audio autoplay v-if="clickToggle">
+            <source src="data:audio/mp3;base64,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"
+                    type="audio/ogg">
+        </audio>
+    </div>
+</div>
+
+<script src="js/index.js"></script>
+</body>
+<style>
+
+</style>
+</html>
